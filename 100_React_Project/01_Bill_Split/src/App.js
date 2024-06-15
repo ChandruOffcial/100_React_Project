@@ -57,7 +57,7 @@ const App = () => {
 				{showAddFriend && <FriendaddForm addFriend={handleAddFriend} />}
 				<Button onClick={handleShowFriend}>{!showAddFriend ? "Add Friend" : "Close"}</Button>
 			</div>
-			{selectedfriend && <FormSplitBill friendDetails={selectedfriend} handleAmount={handleAmount} />}
+			{selectedfriend && <FormSplitBill friendDetails={selectedfriend} handleAmount={handleAmount} key={selectedfriend.id} />}
 		</div>
 	);
 };

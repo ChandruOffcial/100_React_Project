@@ -55,6 +55,13 @@ function TabContent({ item }) {
 	function handleInc() {
 		setLikes(likes + 1);
 	}
+	function tripleInk() {
+		setLikes(likes + 3);
+	}
+	function handleUndo() {
+		setLikes(0);
+		showDetails(true);
+	}
 
 	return (
 		<div className="tab-content">
@@ -67,12 +74,12 @@ function TabContent({ item }) {
 				<div className="hearts-counter">
 					<span>{likes} ❤️</span>
 					<button onClick={handleInc}>+</button>
-					<button>+++</button>
+					<button onClick={tripleInk}>+++</button>
 				</div>
 			</div>
 
 			<div className="tab-undo">
-				<button>Undo</button>
+				<button onClick={handleUndo}>Undo</button>
 				<button>Undo in 2s</button>
 			</div>
 		</div>

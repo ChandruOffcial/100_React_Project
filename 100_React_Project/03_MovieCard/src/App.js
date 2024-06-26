@@ -4,9 +4,10 @@ import Main from "./components/main/Main";
 import { Logo } from "./components/navbar/Navbar";
 import { Search } from "./components/navbar/Navbar";
 import { Result } from "./components/navbar/Navbar";
-import ListBox from "./components/main/ListBox";
-import WatchBox from "./components/main/WatchBox";
+import Box from "./components/main/ListBox";
 import MovieList from "./components/main/MovieList";
+import CardMovie from "./components/main/CardMovie";
+import Summary from "./components/main/Summary";
 
 const tempMovieData = [
 	{
@@ -62,10 +63,13 @@ export default function App() {
 				<Result movies={movies} />
 			</Navbar>
 			<Main>
-				<ListBox>
+				<Box>
 					<MovieList movies={movies} />
-				</ListBox>
-				<WatchBox watched={watched} />
+				</Box>
+				<Box>
+					<Summary watched={watched} />
+					<CardMovie watched={watched} />
+				</Box>
 			</Main>
 		</>
 	);

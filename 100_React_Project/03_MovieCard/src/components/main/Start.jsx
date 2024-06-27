@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+
 const containerStyle = {
 	display: "flex",
 	alignItems: "center",
@@ -41,7 +42,7 @@ const Start = ({ maxRating = 5, color = "black", size = 48, message = [], defaul
 	const [tempRating, setTempRating] = useState(0);
 	function handleRating(rating) {
 		setStar(rating);
-		setrating(rating);
+		// setrating(rating);
 	}
 	const textStyle = {
 		lineHeight: "1",

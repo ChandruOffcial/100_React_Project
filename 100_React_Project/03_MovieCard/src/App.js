@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "./components/navbar/Navbar";
 import Main from "./components/main/Main";
 import { Logo } from "./components/navbar/Navbar";
@@ -8,67 +8,79 @@ import Box from "./components/main/ListBox";
 import MovieList from "./components/main/MovieList";
 import CardMovie from "./components/main/CardMovie";
 import Summary from "./components/main/Summary";
-
-const tempMovieData = [
-	{
-		imdbID: "tt1375666",
-		Title: "Inception",
-		Year: "2010",
-		Poster: "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-	},
-	{
-		imdbID: "tt0133093",
-		Title: "The Matrix",
-		Year: "1999",
-		Poster: "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
-	},
-	{
-		imdbID: "tt6751668",
-		Title: "Parasite",
-		Year: "2019",
-		Poster: "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SX300.jpg",
-	},
-];
-
-const tempWatchedData = [
-	{
-		imdbID: "tt1375666",
-		Title: "Inception",
-		Year: "2010",
-		Poster: "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-		runtime: 148,
-		imdbRating: 8.8,
-		userRating: 10,
-	},
-	{
-		imdbID: "tt0088763",
-		Title: "Back to the Future",
-		Year: "1985",
-		Poster: "https://m.media-amazon.com/images/M/MV5BZmU0M2Y1OGUtZjIxNi00ZjBkLTg1MjgtOWIyNThiZWIwYjRiXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
-		runtime: 116,
-		imdbRating: 8.5,
-		userRating: 9,
-	},
-];
+import MovieDetails from "./components/main/MovieDetails";
+import { ErrorMessage, Loader } from "./components/main/Helper";
 
 export default function App() {
-	const [movies, setMovies] = useState(tempMovieData);
-	const [watched, setWatched] = useState(tempWatchedData);
+	const [movies, setMovies] = useState([]);
+	const [watched, setWatched] = useState([]);
+	const [isLoading, setIsloading] = useState(false);
+	const [error, setError] = useState("");
+	const [query, setQuery] = useState("Bad ");
+	const [selectedID, setSelectedID] = useState(null);
+
+	useEffect(
+		function () {
+			async function dataFetch() {
+				try {
+					setError("");
+					setIsloading(true);
+
+					const request = await fetch(`https://www.omdbapi.com/?i=tt3896198&apikey=6de2aa48&s=${query}`);
+					if (!request.ok) {
+						throw new Error("Somethink In wrong in Fetch Data ");
+					}
+					const res = await request.json();
+					if (res.Response === "False") {
+						throw new Error("Movie Not Found");
+					}
+					const data = res.Search;
+					setMovies(data);
+				} catch (error) {
+					setError(error.message);
+				} finally {
+					setIsloading(false);
+				}
+			}
+			if (query.length === 0) {
+				setError("");
+				setMovies([]);
+				return;
+			}
+			dataFetch();
+		},
+		[query]
+	);
+
+	function handelSelected(id) {
+		setSelectedID(() => (id === selectedID ? null : id));
+	}
+	function handleCloseMovie() {
+		setSelectedID(null);
+	}
 
 	return (
 		<>
 			<Navbar>
 				<Logo />
-				<Search />
+				<Search query={query} setQuery={setQuery} />
 				<Result movies={movies} />
 			</Navbar>
 			<Main>
 				<Box>
-					<MovieList movies={movies} />
+					{isLoading && <Loader />}
+					{!isLoading && !error && <MovieList movies={movies} setSelectedID={handelSelected} />}
+					{error && <ErrorMessage message={error} />}
 				</Box>
 				<Box>
-					<Summary watched={watched} />
-					<CardMovie watched={watched} />
+					{selectedID ? (
+						<MovieDetails id={selectedID} handleCloseMovie={handleCloseMovie} />
+					) : (
+						<>
+							<Summary watched={watched} />
+							<CardMovie watched={watched} />
+						</>
+					)}
 				</Box>
 			</Main>
 		</>

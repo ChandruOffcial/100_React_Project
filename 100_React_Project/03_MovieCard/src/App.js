@@ -1,56 +1,29 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Navbar from "./components/navbar/Navbar";
 import Main from "./components/main/Main";
-import { Logo } from "./components/navbar/Navbar";
-import { Search } from "./components/navbar/Navbar";
-import { Result } from "./components/navbar/Navbar";
+import { Logo, Search, Result } from "./components/navbar/Navbar";
 import Box from "./components/main/ListBox";
 import MovieList from "./components/main/MovieList";
 import CardMovie from "./components/main/CardMovie";
 import Summary from "./components/main/Summary";
 import MovieDetails from "./components/main/MovieDetails";
 import { ErrorMessage, Loader } from "./components/main/Helper";
+import { useMovies } from "./components/Hooks/useMovies";
+import { useLocalStorageState } from "./components/Hooks/useLocalStorageState";
 
 export default function App() {
-	const [movies, setMovies] = useState([]);
-	const [watched, setWatched] = useState([]);
-	const [isLoading, setIsloading] = useState(false);
-	const [error, setError] = useState("");
-	const [query, setQuery] = useState("Bad ");
+	const [query, setQuery] = useState("");
 	const [selectedID, setSelectedID] = useState(null);
+	const { movies, error, isLoading } = useMovies(query);
+	const [watched, setWatched] = useLocalStorageState([], "watched");
 
-	useEffect(
-		function () {
-			async function dataFetch() {
-				try {
-					setError("");
-					setIsloading(true);
+	function handleRemoveWatchList(id) {
+		setWatched((watched) => watched.filter((item) => item.imdbID !== id));
+	}
 
-					const request = await fetch(`https://www.omdbapi.com/?i=tt3896198&apikey=6de2aa48&s=${query}`);
-					if (!request.ok) {
-						throw new Error("Somethink In wrong in Fetch Data ");
-					}
-					const res = await request.json();
-					if (res.Response === "False") {
-						throw new Error("Movie Not Found");
-					}
-					const data = res.Search;
-					setMovies(data);
-				} catch (error) {
-					setError(error.message);
-				} finally {
-					setIsloading(false);
-				}
-			}
-			if (query.length === 0) {
-				setError("");
-				setMovies([]);
-				return;
-			}
-			dataFetch();
-		},
-		[query]
-	);
+	function handleWatched(newMovie) {
+		setWatched((watched) => [...watched, newMovie]);
+	}
 
 	function handelSelected(id) {
 		setSelectedID(() => (id === selectedID ? null : id));
@@ -74,11 +47,11 @@ export default function App() {
 				</Box>
 				<Box>
 					{selectedID ? (
-						<MovieDetails id={selectedID} handleCloseMovie={handleCloseMovie} />
+						<MovieDetails id={selectedID} handleCloseMovie={handleCloseMovie} watchedMovie={handleWatched} watched={watched} />
 					) : (
 						<>
 							<Summary watched={watched} />
-							<CardMovie watched={watched} />
+							<CardMovie watched={watched} handleRemoveWatchList={handleRemoveWatchList} />
 						</>
 					)}
 				</Box>

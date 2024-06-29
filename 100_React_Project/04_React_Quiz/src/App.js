@@ -7,16 +7,24 @@ import StartScreen from "./components/StartScreen";
 import Question from "./components/Question";
 import NextQuestion from "./components/NextQuestion";
 import Progress from "./components/Progress";
+import FinishScreen from "./components/FinishScreen";
+import ResetQuiz from "./components/ResetQuiz";
+import Footer from "./components/Footer";
+import Timer from "./components/Timer";
 
 const initialState = {
 	questions: [],
 
-	// status : 'loading', 'error', 'ready', 'active', 'finshed'
+	// status : 'loading', 'error', 'ready', 'active', 'finished'
 	status: "loading",
 	index: 0,
 	answer: null,
 	points: 0,
+	highScore: 0,
+	reMainingTime: null,
 };
+
+const SEC_PER_QUESTION = 30;
 
 function reducer(state, action) {
 	switch (action.type) {
@@ -25,7 +33,7 @@ function reducer(state, action) {
 		case "dataFailed":
 			return { ...state, status: "error" };
 		case "start":
-			return { ...state, status: "active" };
+			return { ...state, status: "active", reMainingTime: state.questions.length * SEC_PER_QUESTION };
 		case "newAnswer":
 			const currentQuestion = state.questions[state.index];
 			return {
@@ -35,13 +43,19 @@ function reducer(state, action) {
 			};
 		case "nextQuestion":
 			return { ...state, index: state.index + 1, answer: null };
+		case "finish":
+			return { ...state, status: "finished", highScore: state.points > action.highScore ? state.points : action.highScore };
+		case "restart":
+			return { ...initialState, questions: state.questions, status: "ready" };
+		case "tick":
+			return { ...state, reMainingTime: state.reMainingTime - 1, status: state.reMainingTime === 0 ? "finished" : state.status };
 		default:
 			throw new Error("Unknow Action Type Recived");
 	}
 }
 
 const App = () => {
-	const [{ questions, status, index, answer, points }, dispatch] = useReducer(reducer, initialState);
+	const [{ questions, status, index, answer, points, highScore, reMainingTime }, dispatch] = useReducer(reducer, initialState);
 	const numQuestion = questions.length;
 	const maxiumPoints = questions.reduce((previous, current) => previous + current.points, 0);
 
@@ -68,7 +82,17 @@ const App = () => {
 					<>
 						<Progress i={index} num={numQuestion} points={points} maxiumPoints={maxiumPoints} />
 						<Question questions={questions[index]} dispatch={dispatch} answer={answer} />
-						<NextQuestion answer={answer} dispatch={dispatch} />
+						<Footer>
+							<Timer dispatch={dispatch} time={reMainingTime} />
+							<NextQuestion answer={answer} dispatch={dispatch} index={index} numQuestion={numQuestion} />
+						</Footer>
+					</>
+				)}
+
+				{status === "finished" && (
+					<>
+						<FinishScreen ponits={points} maxiumPoints={maxiumPoints} highScore={highScore} />
+						<ResetQuiz dispatch={dispatch} />
 					</>
 				)}
 			</Main>

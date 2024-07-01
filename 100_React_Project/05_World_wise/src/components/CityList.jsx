@@ -7,11 +7,10 @@ import PropTypes from "prop-types";
 const CityList = ({ cities, isloading }) => {
 	if (isloading) return <Spinner />;
 	if (!cities.length) return <Message message="Add Your first city by clicking on the map" />;
-	console.log(cities);
 	return (
 		<ul className={styles.cityList}>
-			{cities.map((city, i) => (
-				<CityItem key={i} city={city} />
+			{cities.map((city) => (
+				<CityItem key={city.id} city={city} />
 			))}
 		</ul>
 	);

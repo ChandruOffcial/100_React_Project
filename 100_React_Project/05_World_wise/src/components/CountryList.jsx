@@ -2,9 +2,12 @@ import CountryItem from "./CountryItem";
 import styles from "./CountryList.module.css";
 import Spinner from "./Spinner";
 import Message from "./Message";
-import PropTypes from "prop-types";
 
-const CountryList = ({ cities, isloading }) => {
+import useCities from "../hooks/useCities";
+
+const CountryList = () => {
+	const { cities, isloading } = useCities();
+
 	if (isloading) return <Spinner />;
 	if (!cities.length) return <Message message="Add Your first Country by clicking on the map" />;
 
@@ -15,7 +18,6 @@ const CountryList = ({ cities, isloading }) => {
 			return arr;
 		}
 	}, []);
-	console.log(countries);
 
 	return (
 		<ul className={styles.countryList}>
@@ -24,11 +26,6 @@ const CountryList = ({ cities, isloading }) => {
 			))}
 		</ul>
 	);
-};
-
-CountryList.propTypes = {
-	cities: PropTypes.arrayOf(PropTypes.object).isRequired,
-	isloading: PropTypes.bool.isRequired,
 };
 
 export default CountryList;

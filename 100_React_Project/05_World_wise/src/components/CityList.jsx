@@ -2,9 +2,11 @@ import CityItem from "./CityItem";
 import styles from "./CityList.module.css";
 import Spinner from "./Spinner";
 import Message from "./Message";
-import PropTypes from "prop-types";
 
-const CityList = ({ cities, isloading }) => {
+import useCities from "../hooks/useCities";
+
+const CityList = () => {
+	const { cities, isloading } = useCities();
 	if (isloading) return <Spinner />;
 	if (!cities.length) return <Message message="Add Your first city by clicking on the map" />;
 	return (
@@ -14,11 +16,6 @@ const CityList = ({ cities, isloading }) => {
 			))}
 		</ul>
 	);
-};
-
-CityList.propTypes = {
-	cities: PropTypes.arrayOf(PropTypes.object).isRequired,
-	isloading: PropTypes.bool.isRequired,
 };
 
 export default CityList;

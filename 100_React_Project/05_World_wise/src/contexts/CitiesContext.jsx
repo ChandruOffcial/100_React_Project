@@ -1,5 +1,4 @@
 import { createContext, useEffect, useState } from "react";
-import PropTypes from "prop-types";
 
 const BASE_URL = "http://localhost:8000";
 const CitiesContext = createContext();
@@ -40,7 +39,5 @@ function CitiesProvider({ children }) {
 	}
 	return <CitiesContext.Provider value={{ cities, isloading, currentCity, fetchCityData }}>{children}</CitiesContext.Provider>;
 }
-CitiesProvider.propTypes = {
-	children: PropTypes.node.isRequired,
-};
+
 export { CitiesProvider, CitiesContext };

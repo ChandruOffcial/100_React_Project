@@ -25,7 +25,6 @@ function City() {
 		[id]
 	);
 	if (isloading) return <Spinner />;
-	console.log(currentCity);
 	return (
 		<div className={styles.city}>
 			<div className={styles.row}>

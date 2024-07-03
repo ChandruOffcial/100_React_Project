@@ -7,15 +7,13 @@ import { useEffect, useState } from "react";
 import useCities from "../hooks/useCities";
 import { useGeolocation } from "../hooks/useGeolocation";
 import Button from "./Button";
+import useUrlPosition from "../hooks/useUrlPosition";
 
 const Map = () => {
-	const [searchQuery] = useSearchParams();
 	const { cities } = useCities();
 	const [mapPosition, setMapPosition] = useState([38.727881642324164, -9.140900099907554]);
 	const { isLoading: geoLoading, position: geoPosition, getPosition } = useGeolocation();
-
-	const lat = searchQuery.get("lat");
-	const lng = searchQuery.get("lng");
+	const [lat, lng] = useUrlPosition();
 
 	useEffect(
 		function () {
@@ -65,8 +63,7 @@ function OnMaplocation() {
 
 	useMapEvents({
 		click: function (e) {
-			console.log(e);
-			navigate(`form?lat${e.latlng.lat}&${e.latlng.lng}`);
+			return navigate(`form?lat=${e.latlng.lat}&lng=${e.latlng.lng}`);
 		},
 	});
 }

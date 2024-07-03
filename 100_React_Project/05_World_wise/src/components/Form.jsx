@@ -7,6 +7,9 @@ import BackButton from "./BackButton";
 import useUrlPosition from "../hooks/useUrlPosition";
 import Message from "./Message";
 import Spinner from "./Spinner";
+import "react-datepicker/dist/react-datepicker.css";
+import DatePicker from "react-datepicker";
+import useCities from "../hooks/useCities";
 
 export function convertToEmoji(countryCode) {
 	const codePoints = countryCode
@@ -19,10 +22,10 @@ export function convertToEmoji(countryCode) {
 const BASE_URL = "https://api.bigdatacloud.net/data/reverse-geocode-client?";
 
 function Form() {
-	const [cityName, setCityName] = useState("");
 	const [date, setDate] = useState(new Date());
 	const [notes, setNotes] = useState("");
 	const [lat, lng] = useUrlPosition();
+	const { createCity } = useCities();
 	const [positionData, setPositionData] = useState({
 		loading: false,
 		city: "",
@@ -30,9 +33,12 @@ function Form() {
 		locality: "",
 		emoji: "",
 		error: "",
+		date: new Date(),
+		notes: "",
 	});
 
 	useEffect(() => {
+		if (!lat || !lng) return;
 		async function fetchCityData() {
 			try {
 				setPositionData((prevState) => ({ ...prevState, loading: true }));
@@ -40,7 +46,6 @@ function Form() {
 				const res = await fetch(`${BASE_URL}latitude=${lat}&longitude=${lng}`);
 				const cityData = await res.json();
 				if (!cityData.countryCode) throw new Error("That doesn't seem to be a city. Click somewhere else 😚");
-				console.log(cityData);
 				setPositionData((prevState) => ({
 					...prevState,
 					city: cityData.city,
@@ -58,23 +63,51 @@ function Form() {
 		fetchCityData();
 	}, [lat, lng]);
 	if (positionData.error) return <Message message={positionData.error} />;
+	if (!lat || !lng) return <Message message={"That doesn't seem to be a city. Click somewhere else 😚\""} />;
 	if (positionData.loading) return <Spinner />;
 
+	async function handleSubmit(e) {
+		e.preventDefault();
+		if (!positionData.city || !date) return;
+
+		const newCity = {
+			cityName: positionData.city,
+			country: positionData.countryCode,
+			emoji: positionData.emoji,
+			date: date,
+			notes: notes,
+			position: {
+				lat: lat,
+				lng: lng,
+			},
+		};
+		await createCity(newCity);
+	}
 	return (
-		<form className={styles.form}>
+		<form className={styles.form} onSubmit={handleSubmit}>
 			<div className={styles.row}>
 				<label htmlFor="cityName">City name</label>
-				<input id="cityName" onChange={(e) => setCityName(e.target.value)} value={positionData.locality || positionData.city || ""} />
+				<input
+					id="cityName"
+					onChange={(e) =>
+						setPositionData((prevState) => ({
+							...prevState,
+							city: e.target.value,
+						}))
+					}
+					value={positionData.locality || positionData.city || ""}
+				/>
 				<span className={styles.flag}>{positionData.emoji}</span>
 			</div>
 
 			<div className={styles.row}>
-				<label htmlFor="date">When did you go to {cityName}?</label>
-				<input id="date" onChange={(e) => setDate(e.target.value)} value={date} />
+				<label htmlFor="date">When did you go to {positionData.city}?</label>
+				{/* <input id="date" onChange={(e) => setDate(e.target.value)} value={date} /> */}
+				<DatePicker selected={date} onChange={(date) => setDate(date)} dateFormat="dd/MM/yyyy" />
 			</div>
 
 			<div className={styles.row}>
-				<label htmlFor="notes">Notes about your trip to {cityName}</label>
+				<label htmlFor="notes">Notes about your trip to {positionData.city}</label>
 				<textarea id="notes" onChange={(e) => setNotes(e.target.value)} value={notes} />
 			</div>
 

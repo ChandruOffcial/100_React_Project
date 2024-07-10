@@ -10,6 +10,7 @@ import Spinner from "./Spinner";
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
 import useCities from "../hooks/useCities";
+import { useNavigate } from "react-router-dom";
 
 export function convertToEmoji(countryCode) {
 	const codePoints = countryCode
@@ -36,6 +37,8 @@ function Form() {
 		date: new Date(),
 		notes: "",
 	});
+
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		if (!lat || !lng) return;
@@ -82,6 +85,7 @@ function Form() {
 			},
 		};
 		await createCity(newCity);
+		navigate("/app/cities");
 	}
 	return (
 		<form className={styles.form} onSubmit={handleSubmit}>
@@ -102,7 +106,6 @@ function Form() {
 
 			<div className={styles.row}>
 				<label htmlFor="date">When did you go to {positionData.city}?</label>
-				{/* <input id="date" onChange={(e) => setDate(e.target.value)} value={date} /> */}
 				<DatePicker selected={date} onChange={(date) => setDate(date)} dateFormat="dd/MM/yyyy" />
 			</div>
 

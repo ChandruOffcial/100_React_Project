@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { faker } from "@faker-js/faker";
 import { PostContextProvider, usePost } from "./contexts/PostContext";
+import Test from "./Test";
 
 function createRandomPost() {
 	return {
@@ -28,6 +29,7 @@ function App() {
 				<Header />
 				<Main />
 				<Archive />
+				<Test />
 				<Footer />
 			</PostContextProvider>
 		</section>
